@@ -180,31 +180,74 @@
             });
         });
 
-        function createGif() {
-            gifshot.createGIF({
-                images: images,
-                gifWidth: 360,
-                gifHeight: 360,
-                interval: 0.1, 
-                numFrames: images.length,
-                background: 'transparent' 
-            }, function (obj) {
-                if (!obj.error) {
-                    const gifUrl = obj.image;
-                    const img = document.createElement('img');
-                    img.src = gifUrl;
-                    previewContainer.innerHTML = ''; 
-                    previewContainer.appendChild(img);
+       function createGif() {
+    const processedImages = images.map(imageDataUrl => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.src = imageDataUrl;
 
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('share').style.display = 'inline-block';
+            img.onload = function() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 360;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
 
-                    document.getElementById('share').addEventListener('click', () => {
-                        shareGif(gifUrl);
-                    });
-                }
-            });
-        }
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, 359, 359);
+
+    
+    console.log('Canvas width:', canvas.width);
+    console.log('Canvas height:', canvas.height);
+
+    resolve(canvas.toDataURL('image/png'));
+            };
+        });
+    });
+
+    Promise.all(processedImages).then(canvasDataUrls => {
+        
+        canvasDataUrls.forEach((url, index) => {
+            const testImg = new Image();
+            testImg.src = url;
+            testImg.onload = () => {
+                console.log(`Processed Image ${index + 1} width:`, testImg.naturalWidth);
+                console.log(`Processed Image ${index + 1} height:`, testImg.naturalHeight);
+            };
+        });
+
+        gifshot.createGIF({
+            images: canvasDataUrls,
+            interval: 0.1,
+            gifWidth: 360,
+            gifHeight: 360,
+            numFrames: canvasDataUrls.length
+        }, function(obj) {
+            if (!obj.error) {
+                const gifUrl = obj.image;
+                const img = document.createElement('img');
+                img.src = gifUrl;
+
+                img.onload = function() {
+                    console.log('GIF width:', img.naturalWidth);
+                    console.log('GIF height:', img.naturalHeight);
+                };
+
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(img);
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('share').style.display = 'inline-block';
+
+                document.getElementById('share').addEventListener('click', () => {
+                    shareGif(gifUrl);
+                });
+            } else {
+                console.error('Error creating GIF:', obj.error);
+            }
+        });
+    });
+}
 
         function shareGif(gifDataUrl) {
             fetch(gifDataUrl)
