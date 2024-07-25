@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StickCre - GIF Sticker</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #f3ec78, #af4261);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+        h1 {
+            color: lime;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .upload-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .upload-container label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+        .upload-container input[type="file"] {
+            display: none;
+        }
+        .upload-container input[type="file"] + label {
+            display: inline-block;
+            background-color: #ff5722;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .upload-container input[type="file"] + label:hover {
+            background-color: #e64a19;
+        }
+        #preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .preview-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        #loading {
+            display: none;
+            color: #FF00FF;
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #share {
+            display: none;
+            padding: 10px 20px;
+            background-color: #ff5722;
+            color: #fff0f7;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 25px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        #share:hover {
+            background-color: #f6f070;            
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 22px;
+            color: #f06f9f;
+            text-align: center;
+        }
+        .footer a {
+            color: cyan;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer a:hover {
+            color: #e64a19;
+        }
+    </style>
+
+</div>
+</head>
+<body>
+    <h1>ẢNH CONVERT GIF ZALO</h1>
+    <div class="upload-container">
+        <input type="file" id="imageUpload1" accept="image/*">
+        <label for="imageUpload1">CHỌN ẢNH 1</label>
+        <input type="file" id="imageUpload2" accept="image/*">
+        <label for="imageUpload2">CHỌN ẢNH 2</label>
+        <input type="file" id="imageUpload3" accept="image/*">
+        <label for="imageUpload3">CHỌN ẢNH 3</label>
+        <input type="file" id="imageUpload4" accept="image/*">
+        <label for="imageUpload4">CHỌN ẢNH 4</label>
+        <input type="file" id="imageUpload5" accept="image/*">
+        <label for="imageUpload5">CHỌN ẢNH 5</label>
+        <input type="file" id="imageUpload6" accept="image/*">
+        <label for="imageUpload6">CHỌN ẢNH 6</label>
+    </div>
+    <div id="preview"></div>
+    <div id="loading">ĐANG CHUYỂN ĐỔI...</div>
+    <button id="share">SHARE GIF STICKER</button>
+    <div class="footer">
+    <p>🇻🇳 <a href="https://youtube.com/@mavuongdaccau" target="_blank">@Creator By Tulen Đặc Cầu 🇻🇳</a></p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+    <script>
+        const imageUploadElements = [
+            document.getElementById('imageUpload1'),
+            document.getElementById('imageUpload2'),
+            document.getElementById('imageUpload3'),
+            document.getElementById('imageUpload4'),
+            document.getElementById('imageUpload5'),
+            document.getElementById('imageUpload6')
+        ];
+        const previewContainer = document.getElementById('preview');
+        const images = [null, null, null, null, null, null];
+
+        imageUploadElements.forEach((input, index) => {
+            input.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 360;
+                        canvas.height = 360;
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, 360, 360);
+                        ctx.drawImage(img, 0, 0, 359, 359);
+                        images[index] = canvas.toDataURL('image/png');
+
+                        
+                        const previewImg = document.createElement('img');
+                        previewImg.src = canvas.toDataURL('image/png');
+                        previewImg.className = 'preview-img';
+                        if (previewContainer.children[index]) {
+                            previewContainer.replaceChild(previewImg, previewContainer.children[index]);
+                        } else {
+                            previewContainer.appendChild(previewImg);
+                        }
+
+                        if (images.every(img => img !== null)) {
+                            document.getElementById('loading').style.display = 'block';
+                            createGif();
+                        }
+                    };
+                }
+            });
+        });
+
+        function createGif() {
+            gifshot.createGIF({
+                images: images,
+                gifWidth: 360,
+                gifHeight: 360,
+                interval: 0.1, 
+                numFrames: images.length
+            }, function (obj) {
+                if (!obj.error) {
+                    const gifUrl = obj.image;
+                    const img = document.createElement('img');
+                    img.src = gifUrl;
+                    previewContainer.innerHTML = ''; 
+                    previewContainer.appendChild(img);
+
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('share').style.display = 'inline-block';
+
+                    document.getElementById('share').addEventListener('click', () => {
+                        shareGif(gifUrl);
+                    });
+                }
+            });
+        }
+
+        function shareGif(gifDataUrl) {
+            fetch(gifDataUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], 'sticker.gif', { type: 'image/gif' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            files: [file],
+                            title: 'GIF Sticker',
+                            text: 'Check out this cool GIF sticker!'
+                        })
+                        .then(() => console.log('Shared successfully'))
+                        .catch(error => console.error('Sharing failed', error));
+                    } else {
+                        alert('Your system doesn\'t support sharing files.');
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
