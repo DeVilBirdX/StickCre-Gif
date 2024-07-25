@@ -150,13 +150,20 @@
                         canvas.width = 360;
                         canvas.height = 360;
                         const ctx = canvas.getContext('2d');
-                        ctx.clearRect(0, 0, 360, 360);
-                        ctx.drawImage(img, 0, 0, 359, 359);
-                        images[index] = canvas.toDataURL('image/png');
+                        ctx.clearRect(0, 0, 360, 360); 
+                        ctx.drawImage(img, 0, 0, 359, 359); 
 
                         
+                        const transparentCanvas = document.createElement('canvas');
+                        transparentCanvas.width = 360;
+                        transparentCanvas.height = 360;
+                        const transparentCtx = transparentCanvas.getContext('2d');
+                        transparentCtx.drawImage(canvas, 0, 0);
+
+                        images[index] = transparentCanvas.toDataURL('image/png');
+
                         const previewImg = document.createElement('img');
-                        previewImg.src = canvas.toDataURL('image/png');
+                        previewImg.src = transparentCanvas.toDataURL('image/png');
                         previewImg.className = 'preview-img';
                         if (previewContainer.children[index]) {
                             previewContainer.replaceChild(previewImg, previewContainer.children[index]);
@@ -179,7 +186,8 @@
                 gifWidth: 360,
                 gifHeight: 360,
                 interval: 0.1, 
-                numFrames: images.length
+                numFrames: images.length,
+                background: 'transparent' 
             }, function (obj) {
                 if (!obj.error) {
                     const gifUrl = obj.image;
